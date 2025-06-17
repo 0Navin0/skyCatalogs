@@ -17,6 +17,12 @@ from skycatalogs.utils.sed_tools import TophatSedFactory, DiffskySedFactory
 from skycatalogs.utils.sed_tools import TrilegalSedFactory, SsoSedFactory
 from skycatalogs.utils.sed_tools import MilkyWayExtinction
 from skycatalogs.utils.config_utils import Config
+# <<<<<<< HEAD
+# =======
+# from skycatalogs.utils.shapes import Box, Disk, PolygonalRegion
+# from skycatalogs.utils.shapes import compute_region_mask
+from skycatalogs.utils.creator_utils import find_trilegal_subpixels
+# >>>>>>> 3bad2cc (for trilegal make use of spatial sorting in row groups)
 from skycatalogs.objects.star_object import StarObject
 from skycatalogs.objects.galaxy_object import GalaxyObject
 from skycatalogs.objects.diffsky_object import DiffskyObject
@@ -26,6 +32,51 @@ from skycatalogs.objects.trilegal_object import TrilegalObject, TrilegalCollecti
 __all__ = ['SkyCatalog', 'open_catalog']
 
 
+# <<<<<<< HEAD
+# =======
+# # This function should maybe be moved to utils
+# def _get_intersecting_hps(ring_ordering, nside, region):
+#     '''
+#     Given healpixel structure defined by ring_ordering and nside, find
+#     all healpixels which intersect region, where region may be a box,
+#     a disk or a polygonal region.
+#     Return as some kind of iterable
+#     Note it's possible extra hps which don't actually intersect the region
+#     will be returned
+#     '''
+#     # First convert region description to an array (4,3) with (x,y,z) coords
+#     # for each vertex
+#     if isinstance(region, Box):
+#         vec = healpy.pixelfunc.ang2vec([region.ra_min, region.ra_max,
+#                                         region.ra_max, region.ra_min],
+#                                        [region.dec_min, region.dec_min,
+#                                         region.dec_max, region.dec_max],
+#                                        lonlat=True)
+
+#         pixels = healpy.query_polygon(nside, vec, inclusive=True,
+#                                       nest=(not ring_ordering))
+#     elif isinstance(region, Disk):
+#         # Convert inputs to the types query_disk expects
+#         center = healpy.pixelfunc.ang2vec(region.ra, region.dec,
+#                                           lonlat=True)
+#         radius_rad = (region.radius_as * u.arcsec).to_value('radian')
+
+#         pixels = healpy.query_disc(nside, center, radius_rad, inclusive=True,
+#                                    nest=(not ring_ordering))
+
+#     elif isinstance(region, PolygonalRegion):
+#         pixels = healpy.query_polygon(nside, region.get_vertices(),
+#                                       inclusive=True, nest=(not ring_ordering))
+#     else:
+#         raise ValueError('Unsupported region type')
+
+#     # ensure pixels are always presented in the same order
+#     pixels = list(pixels)
+#     pixels.sort()
+#     return pixels
+#
+#
+# >>>>>>> 3bad2cc (for trilegal make use of spatial sorting in row groups)
 def _compress_via_mask(tbl, id_column, region, source_type='galaxy',
                        mjd=None, exposure=EXPOSURE_DEFAULT):
     '''
@@ -640,7 +691,29 @@ class SkyCatalog(object):
                 continue
 
             # Make a collection for each row group
+            subpixels = False
+            active_nsub = [hp]    # only used for trilegal
+            if object_type == "trilegal" and rdr.n_row_groups > 1:
+                n_gps = rdr.n_row_groups
+                #  Get sub hps
+                subpixels = True
+                n_rows = the_reader.n_rows
+                sub_nside, out_ring, subs = find_trilegal_subpixels(hp, n_rows,
+                                                                    n_gps=n_gps)
+
+                # Now find subpixels intersecting the regions
+                active_nsub = set(_get_intersecting_hps(out_ring, sub_nside,
+                                                        region))
+
             for rg in range(rdr.n_row_groups):
+                if subpixels:
+                    # need to find out whether the region intersects
+                    # the row group at all.   Get subpixels assoc. with
+                    # this row group.  See if they intersect active_nsub.
+                    rg_subs = set(subs[rg])
+                    if not active_nsub.intersection(rg_subs):
+                        continue
+
                 arrow_t = rdr.read_columns(columns, None, rg)
                 if object_type in {'galaxy', 'diffsky_galaxy', 'snana',
                                    'trilegal'}:
