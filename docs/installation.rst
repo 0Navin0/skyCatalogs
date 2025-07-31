@@ -5,9 +5,17 @@ Installation Instructions
 
    **Prerequisites**:
 
-   To use **skyCatalogs 1.7.x**
+   To use **skyCatalogs>=1.7.0**
 
    all that is required is a reasonably current version of the  `LSST science pipelines <https://pipelines.lsst.io/>`_ .  See installation instructions below.
+   For **skyCatalogs>=2.1.1**, having LSST Science Pipelines installed is optional.
+   As of 2.1.1, the only feature that is unavailable without it is the ability to use a Butler to include Gaia objects.
+
+   If installing without the LSST Science Pipelines, ``skyCatalogs`` can be `pip` installed from PyPI as
+
+.. code-block:: sh
+
+    pip install skyCatalogs
 
 .. note::
 
