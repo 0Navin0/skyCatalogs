@@ -7,10 +7,12 @@ Installation Instructions
 
    To use **skyCatalogs>=1.7.0**
 
-   all that is required is a reasonably current version of the  `LSST science pipelines <https://pipelines.lsst.io/>`_ .  See section "Installation with LSST science pipelines" below.
+   all that is required is a reasonably current version of the  `LSST science pipelines <https://pipelines.lsst.io/>`_ .  See section [**Installation with LSST science pipelines**](#installation-with-lsst-science-pipelines).
+   
    For **skyCatalogs>=2.1.1**, having LSST Science Pipelines installed is optional; the only feature that is unavailable without it is the ability to use a Butler to include Gaia objects.
 
-   If installing without the LSST Science Pipelines, go to the section "Installation without LSST sciene pipelines" near the end of this page.
+   If installing without the LSST Science Pipelines, go to the section
+   [**Installation without LSST science pipelines**](#installation-without-lsst-science-pipelines).
 
 .. note::
 
@@ -66,10 +68,10 @@ If you do not intend to do any development you may choose instead to clone the m
    git clone https://github.com/LSSTDESC/skyCatalogs.git --branch v.2.1.1
 
 
-Setup  *skyCatalogs*
-~~~~~~~~~~~~~~~~~~~~~
+Per-session Setup 
+~~~~~~~~~~~~~~~~~~
 
-This setup step should be repeated for each new session.  Here is a ``skycatalogs-setup.sh`` file you can use before each session
+Here is a ``skycatalogs-setup.sh`` file you can use before each session
 
 .. code-block:: sh
 
@@ -81,20 +83,28 @@ This setup step should be repeated for each new session.  Here is a ``skycatalog
    setup -k -r $SKYCATALOGS_HOME/skyCatalogs
 
 
-Now go to section "Install needed data files" below.
+Now go to section [**Install needed data files**](#install-needed-data-files) below.
 
 Install without LSST science pipelines
 --------------------------------------
 
+Install skyCatalogs
+~~~~~~~~~~~~~~~~~~~
+
 All you need to do is pip install:
 
 .. code-block:: sh
+                
    pip install skyCatalogs
 
+Per-session setup
+~~~~~~~~~~~~~~~~~
+
 Every session you will also need to define a ``SKYCATALOGS_HOME`` directory
-where other needed files (see next section) will go:
+where other needed files (see section [**Install needed data files**](#install-needed-data-files)) will go:
 
 .. code-block:: sh
+                
    export SKYCATALOGS_HOME=*PUT YOUR INSTALL DIRECTORY HERE*
 
 
@@ -110,6 +120,10 @@ Go to your `SKYCATALOGS_HOME` directory and download some needed data files (you
    mkdir -p rubin_sim_data/sims_sed_library
    curl https://s3df.slac.stanford.edu/groups/rubin/static/sim-data/rubin_sim_data/throughputs_2023_09_07.tgz | tar -C rubin_sim_data -xz
    curl https://s3df.slac.stanford.edu/groups/rubin/static/sim-data/sed_library/seds_170124.tar.gz  | tar -C rubin_sim_data/sims_sed_library -xz
+
+The following exports must be done every session.
+
+.. code-block:: sh
 
    export RUBIN_SIM_DATA_DIR=$SKYCATALOGS_HOME/rubin_sim_data
    export SIMS_SED_LIBRARY_DIR=$SKYCATALOGS_HOME/rubin_sim_data/sims_sed_library
