@@ -2,17 +2,16 @@ Installation Instructions
 =========================
 
 .. note::
-
    **Prerequisites**:
 
    To use **skyCatalogs>=1.7.0**
 
-   all that is required is a reasonably current version of the  `LSST science pipelines <https://pipelines.lsst.io/>`_ .  See section [**Installation with LSST science pipelines**](#installation-with-lsst-science-pipelines).
+   all that is required is a reasonably current version of the  `LSST science pipelines <https://pipelines.lsst.io/>`_ .  See section :ref:`with-pipelines`
    
    For **skyCatalogs>=2.1.1**, having LSST Science Pipelines installed is optional; the only feature that is unavailable without it is the ability to use a Butler to include Gaia objects.
 
    If installing without the LSST Science Pipelines, go to the section
-   [**Installation without LSST science pipelines**](#installation-without-lsst-science-pipelines).
+   :ref:`without-pipelines`
 
 .. note::
 
@@ -22,6 +21,8 @@ Installation Instructions
 
 Installation with LSST science pipelines
 ------------------------------------------
+
+.. _with-pipelines:
 
 Installing LSST science pipelines
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -83,7 +84,9 @@ Here is a ``skycatalogs-setup.sh`` file you can use before each session
    setup -k -r $SKYCATALOGS_HOME/skyCatalogs
 
 
-Now go to section [**Install needed data files**](#install-needed-data-files) below.
+Now go to section :ref:`install-data-files` below.
+
+.. _without-pipelines:
 
 Install without LSST science pipelines
 --------------------------------------
@@ -101,13 +104,14 @@ Per-session setup
 ~~~~~~~~~~~~~~~~~
 
 Every session you will also need to define a ``SKYCATALOGS_HOME`` directory
-where other needed files (see section [**Install needed data files**](#install-needed-data-files)) will go:
+where other needed files (see section :ref:`install-data-files` below) will go:
 
 .. code-block:: sh
                 
    export SKYCATALOGS_HOME=*PUT YOUR INSTALL DIRECTORY HERE*
 
-
+.. _install-data-files:
+   
 Install needed data files
 -------------------------
 
