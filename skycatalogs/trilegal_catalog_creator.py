@@ -196,8 +196,9 @@ class TrilegalMainCatalogCreator:
                                           metadata_key='provenance')
         written = 0
         for hp in hps:
+            self._logger.info(f'Beginning healpixel {hp}')
             written += self._write_hp(hp, schema)
-
+            self._logger.info(f'Completed healpixel {hp}')
         if written == 0:
             return
         # Add config information for trilegal
