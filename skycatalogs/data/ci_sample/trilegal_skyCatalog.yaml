@@ -1,4 +1,4 @@
-catalog_dir: trilegal_batch
+catalog_dir: .
 catalog_name: trilegal_skyCatalog
 object_types:
   trilegal: !include |-

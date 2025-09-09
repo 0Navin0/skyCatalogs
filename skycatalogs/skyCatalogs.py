@@ -655,8 +655,7 @@ class SkyCatalog(object):
 
                 # Now find subpixels intersecting the regions
                 if region:
-                    active_nsub = set(_get_intersecting_hps(out_ring, sub_nside,
-                                                            region))
+                    active_nsub = set(region.get_intersecting_hps(sub_nside, out_ring))
                 else:  # region == None means use full pixel
                     use_all = True
 
