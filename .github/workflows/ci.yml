@@ -104,8 +104,13 @@ jobs:
                 cd pystellibs
                 git checkout v1.0.0
                 pip install --no-build-isolation --no-deps -e .
-                export PYTHONPATH=.:${PYTHONPATH}
-                echo $PYTHONPATH
+                if [ -z  "$PYTHONPATH"]
+                then
+                  export PYTHONPATH=${PWD}
+                else
+                  export PYTHONPATH=${PWD}:${PYTHONPATH}
+                fi
+                echo PYTHONPATH is $PYTHONPATH
                 cd ..
             - name: Install skyCatalogs
               run: |
