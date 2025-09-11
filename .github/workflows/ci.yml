@@ -105,6 +105,7 @@ jobs:
                 git checkout v1.0.0
                 pip install --no-build-isolation --no-deps -e .
                 export PYTHONPATH=.:${PYTHONPATH}
+                echo $PYTHONPATH
                 cd ..
             - name: Install skyCatalogs
               run: |
