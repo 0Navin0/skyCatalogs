@@ -98,7 +98,14 @@ jobs:
               with:
                 python-version: ${{ matrix.python-version }}
 
-
+            - name: Install pystellibs
+              run: |
+                git clone https://github.com/JoanneBogart/pystellibs.git
+                cd pystellibs
+                git checkout v1.0.0
+                pip install --no-build-isolation --no-deps -e .
+                export PYTHONPATH=.:${PYTHONPATH}
+                cd ..
             - name: Install skyCatalogs
               run: |
                 uv venv

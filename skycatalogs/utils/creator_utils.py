@@ -40,7 +40,8 @@ def make_MW_extinction_rv(ra, dec):
 PACKAGE_DIR = os.path.dirname(os.path.abspath(str(Path(__file__).parent.parent)))
 DATA_DIR = os.path.join(PACKAGE_DIR, "skycatalogs", "data")
 
-
+# get_trilegal_hp_nrows and find_trilegal_subpixels should move to
+# separate file.  find_trilegal_subpixels is used by API as well as creator.
 def get_trilegal_hp_nrows(hp, nside=32):
     counts_path = os.path.join(DATA_DIR, "trilegal", "star_counts.parquet")
     tbl = pd.read_parquet(counts_path)
