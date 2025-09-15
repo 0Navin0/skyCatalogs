@@ -13,6 +13,8 @@ Installation Instructions
    If installing without the LSST Science Pipelines, go to the section
    :ref:`without-pipelines`
 
+   To access trilegal objects one must install at least one additional package, possibly more if not useing the LSST Science Pipelines.  See :ref: `trilegal`.
+
 .. note::
 
    **Use with imSim**:
@@ -54,7 +56,9 @@ Source the appropriate setup script (note the -ext in the name) and then setup t
 Install skyCatalogs itself
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Clone the skyCatalogs package from GitHub:
+Clone the skyCatalogs package from GitHub.  Here we assume you are in
+your installation directory SKYCATALOGS_HOME as described in the section
+:ref: `per_session` below.
 
 .. code-block:: sh
 
@@ -68,6 +72,22 @@ If you do not intend to do any development you may choose instead to clone the m
 
    git clone https://github.com/LSSTDESC/skyCatalogs.git --branch v.2.1.1
 
+.. _trilegal
+
+Accessing trilegal objects
+~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+In order to access the trilegal objects you need to install the pystellibs packag, e.g.
+
+.. code-block :: sh
+
+   git clone https://github.com/JoanneBogart/pystellibs.git
+   cd pystellibs
+   git checkout v1.0.0
+   pip install  --user --no-deps --nobuild-isolation -e .
+   cd ..
+
+.. _per_session
 
 Per-session Setup 
 ~~~~~~~~~~~~~~~~~~
@@ -83,7 +103,15 @@ Here is a ``skycatalogs-setup.sh`` file you can use before each session
 
    setup -k -r $SKYCATALOGS_HOME/skyCatalogs
 
+You may want to add the per-session setup needed for the data files
+(:ref: `data-files`) and, if applicable, for trilegal objects.
 
+If you are using trilegal objects you also need to make sure your installation of pystellibs is accessible.  If not and if PYTHONPATH is not null
+
+.. code-block:: sh
+
+   export PYTHONPATH=${SKYCATALOGS_HOME/pystellibs}:${PYTHONPATH}
+   
 Now go to section :ref:`install-data-files` below.
 
 .. _without-pipelines:
@@ -125,14 +153,13 @@ Go to your `SKYCATALOGS_HOME` directory and download some needed data files (you
    curl https://s3df.slac.stanford.edu/groups/rubin/static/sim-data/rubin_sim_data/throughputs_2023_09_07.tgz | tar -C rubin_sim_data -xz
    curl https://s3df.slac.stanford.edu/groups/rubin/static/sim-data/sed_library/seds_170124.tar.gz  | tar -C rubin_sim_data/sims_sed_library -xz
 
-The following exports must be done every session.
+The following exports must be done every session, not just when installing the data files.
 
 .. code-block:: sh
 
    export RUBIN_SIM_DATA_DIR=$SKYCATALOGS_HOME/rubin_sim_data
    export SIMS_SED_LIBRARY_DIR=$SKYCATALOGS_HOME/rubin_sim_data/sims_sed_library
 
-The exports must be done every session, not just when installing the data files.   
 Using skyCatalogs
 -----------------
 
