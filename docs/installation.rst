@@ -86,7 +86,7 @@ In order to access the trilegal objects you need to install the pystellibs packa
    pip install  --user --no-deps --nobuild-isolation -e .
    cd ..
 
-.. _per-session
+.. _per-session:
 
 Per-session Setup 
 ~~~~~~~~~~~~~~~~~~
