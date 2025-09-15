@@ -77,7 +77,7 @@ If you do not intend to do any development you may choose instead to clone the m
 Accessing trilegal objects
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-In order to access the trilegal objects you need to install the pystellibs packag, e.g.
+In order to access the trilegal objects you need to install the pystellibs package.  You can do something like this:
 
 .. code-block :: sh
 
@@ -104,9 +104,9 @@ Here is a ``skycatalogs-setup.sh`` file you can use before each session
    setup -k -r $SKYCATALOGS_HOME/skyCatalogs
 
 You may want to add the per-session setup needed for the data files
-(:ref: `data-files`) and, if applicable, for trilegal objects.
+(:ref: `install-data-files`) and, if applicable, for trilegal objects.
 
-If you are using trilegal objects you also need to make sure your installation of pystellibs is accessible.  If not and if PYTHONPATH is not null
+If you are using trilegal objects you also need to make sure your installation of pystellibs is accessible.  If not, and assuming PYTHONPATH is not null
 
 .. code-block:: sh
 
