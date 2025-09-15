@@ -58,7 +58,7 @@ Install skyCatalogs itself
 
 Clone the skyCatalogs package from GitHub.  Here we assume you are in
 your installation directory SKYCATALOGS_HOME as described in the section
-:ref: `per_session` below.
+:ref: `per-session` below.
 
 .. code-block:: sh
 
@@ -87,7 +87,7 @@ In order to access the trilegal objects you need to install the pystellibs packa
    pip install  --user --no-deps --nobuild-isolation -e .
    cd ..
 
-.. _per_session
+.. _per-session
 
 Per-session Setup 
 ~~~~~~~~~~~~~~~~~~
