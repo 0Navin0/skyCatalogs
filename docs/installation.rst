@@ -57,8 +57,7 @@ Install skyCatalogs itself
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Clone the skyCatalogs package from GitHub.  Here we assume you are in
-your installation directory SKYCATALOGS_HOME as described in the section
-:ref: `per-session` below.
+your installation directory SKYCATALOGS_HOME as described in the section :ref: `per-session` below.
 
 .. code-block:: sh
 
