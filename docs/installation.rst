@@ -13,7 +13,7 @@ Installation Instructions
    If installing without the LSST Science Pipelines, go to the section
    :ref:`without-pipelines`
 
-   To access trilegal objects one must install at least one additional package, possibly more if not useing the LSST Science Pipelines.  See :ref: `trilegal`.
+   To access trilegal objects one must install at least one additional package, possibly more if not useing the LSST Science Pipelines.  See :ref:`trilegal`.
 
 .. note::
 
@@ -57,7 +57,7 @@ Install skyCatalogs itself
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Clone the skyCatalogs package from GitHub.  Here we assume you are in
-your installation directory SKYCATALOGS_HOME as described in the section :ref: `per-session` below.
+your installation directory SKYCATALOGS_HOME as described in the section :ref:`per-session` below.
 
 .. code-block:: sh
 
@@ -103,7 +103,7 @@ Here is a ``skycatalogs-setup.sh`` file you can use before each session
    setup -k -r $SKYCATALOGS_HOME/skyCatalogs
 
 You may want to add the per-session setup needed for the data files
-(:ref: `install-data-files`) and, if applicable, for trilegal objects.
+(:ref:`install-data-files`) and, if applicable, for trilegal objects.
 
 If you are using trilegal objects you also need to make sure your installation of pystellibs is accessible.  If not, and assuming PYTHONPATH is not null
 
