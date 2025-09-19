@@ -214,7 +214,7 @@ class DiffskySedFactory:
 
 class TrilegalSedFactory():
 
-    def __init__(self, object_type_config):
+    def __init__(self, object_type_config, logger):
         '''
         Parameters
         ----------
@@ -222,6 +222,16 @@ class TrilegalSedFactory():
                             config pertaining to object type 'trilegal'
         '''
         self._pystellib = None
+        self._logger = logger
+
+        self._errors = 0
+
+    @property
+    def error_count(self):
+        return self._errors
+
+    def clear_errors(self):
+        self._errors = 0
 
     def get_sed(self, tri):
         '''
@@ -236,13 +246,13 @@ class TrilegalSedFactory():
         If SED file present, find row and wave length values in sed file
         Otherwise use quantities in main parquet file + pystellibs
         In either case return unextincted, unnormalized, unthinned SED,
-        just as calculated by pystellib, except converted from Angstroms
-        to nm. The other transformations are handled elsewhere
+        just as calculated by pystellib. The other transformations are
+        handled elsewhere
         '''
         if not self._pystellib:
             from pystellibs import BTSettl
             self._pystellib = BTSettl(medres=False)
-            self._wl = self._pystellib.wavelength / 10 # convert to nm
+            self._wl = self._pystellib.wavelength / 10  # convert to nm
 
         # Get inputs from parquet file
         native = ['logT', 'logg', 'logL', 'Z']
@@ -250,15 +260,25 @@ class TrilegalSedFactory():
 
         # May generate a runtime error if parameters are outside
         # interpolation range
+        error_msg = None
         try:
             spectrum = self._pystellib.generate_stellar_spectrum(*spec_inputs)
         except RuntimeError:
-            return None
+            error_msg = 'Run-time error generating SED'
 
-        if np.isnan(spectrum[0]):
+        if not error_msg:
+            if spectrum is None:
+                error_msg = 'No SED computed'
+            elif np.isnan(spectrum[0]):
+                error_msg = 'NaNs in SED'
+
+        if error_msg:
+            # Maybe keep track separately depending on value of evol_label?
+            # evol_label = tri.get_native_attribute('evol_label')
+            if not self._errors:
+                self._logger.warning(error_msg)
+            self._errors += 1
             return None
-        # Convert spectrum units as well
-        spectrum = spectrum * 10
 
         sed_table = galsim.LookupTable(self._wl, spectrum, interpolant='linear')
         sed = galsim.SED(sed_table, 'nm', 'flambda')
@@ -296,7 +316,7 @@ class TrilegalSedFactory():
             a_dict[k] = a_dict[k][l_bnd: u_bnd]
         df = pd.DataFrame(a_dict)
         wl_axis, spectra = self._pystellib.generate_individual_spectra(df)
-        #    self._logger.info('Computed spectra')
+
         # Convert wl_axis, spectra from A to nm.
         wl_axis = wl_axis / 10
         spectra = spectra * 10
@@ -370,7 +390,7 @@ class MilkyWayExtinction:
     def extinguish(self, sed, mwAv):
         ext = self.extinction.extinguish(self.wls*u.nm, Av=mwAv)
         lut = galsim.LookupTable(self.wls, ext, interpolant='linear')
-        mw_ext = galsim.SED(lut, wave_type='nm', flux_type='1')
+        mw_ext = galsim.SED(lut, wave_type='nm', flux_type='1').thin()
         sed = sed*mw_ext
         return sed
 

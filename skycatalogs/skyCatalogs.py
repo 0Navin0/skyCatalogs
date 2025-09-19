@@ -1,11 +1,8 @@
 import os
 import re
 import logging
-import healpy
 import numpy as np
 import numpy.ma as ma
-from astropy import units as u
-import lsst.sphgeom
 from skycatalogs.objects.base_object import _load_lsst_bandpasses
 from skycatalogs.objects.base_object import _load_roman_bandpasses
 from skycatalogs.utils.catalog_utils import CatalogContext
@@ -17,7 +14,7 @@ from skycatalogs.utils.sed_tools import TophatSedFactory, DiffskySedFactory
 from skycatalogs.utils.sed_tools import TrilegalSedFactory, SsoSedFactory
 from skycatalogs.utils.sed_tools import MilkyWayExtinction
 from skycatalogs.utils.config_utils import Config
-from skycatalogs.utils.creator_utils import find_trilegal_subpixels
+from skycatalogs.utils.trilegal_utils import get_trilegal_active
 from skycatalogs.objects.star_object import StarObject
 from skycatalogs.objects.galaxy_object import GalaxyObject
 from skycatalogs.objects.diffsky_object import DiffskyObject
@@ -25,6 +22,7 @@ from skycatalogs.objects.snana_object import SnanaObject, SnanaCollection
 from skycatalogs.objects.trilegal_object import TrilegalObject, TrilegalCollection
 
 __all__ = ['SkyCatalog', 'open_catalog']
+
 
 def _compress_via_mask(tbl, id_column, region, source_type='galaxy',
                        mjd=None, exposure=EXPOSURE_DEFAULT):
@@ -142,9 +140,9 @@ def _compute_transient_mask(current_mjd, start_mjd, end_mjd):
     return mask
 
 
-SECONDS_PER_DAY = 24.0*3600.0
-MJD_EPS = 0.1/SECONDS_PER_DAY
-JD_SEC = 1.0/SECONDS_PER_DAY
+SECONDS_PER_DAY = 24.0 * 3600.0
+MJD_EPS = 0.1 / SECONDS_PER_DAY
+JD_SEC = 1.0 / SECONDS_PER_DAY
 
 
 def _compute_variable_mask(current_mjd, mjd_column, exposure, epsilon=MJD_EPS):
@@ -292,7 +290,8 @@ class SkyCatalog(object):
                 'trilegal',
                 object_class=TrilegalObject,
                 collection_class=TrilegalCollection)
-            self._trilegal_sed_factory = TrilegalSedFactory(trilegal_config)
+            self._trilegal_sed_factory = TrilegalSedFactory(trilegal_config,
+                                                            self._logger)
 
         # Register third-party object type classes
         object_types = self._config['object_types']
@@ -639,32 +638,12 @@ class SkyCatalog(object):
             if 'ra' not in rdr.columns:
                 continue
 
-            # Make a collection for each row group
-            subpixels = False
-            active_nsub = [hp]    # only used for trilegal
-            if object_type == "trilegal" and rdr.n_row_groups > 1:
-                # Row groups form a spatial partition.  May not need to
-                # search them all
-                n_gps = rdr.n_row_groups
-                #  Get sub hps
-                subpixels = True
-                use_all = False
-                n_rows = the_reader.n_rows
-                sub_nside, out_ring, subs = find_trilegal_subpixels(hp, n_rows,
-                                                                    n_gps=n_gps)
-
-                # Now find subpixels intersecting the regions
-                if region:
-                    active_nsub = set(region.get_intersecting_hps(sub_nside, out_ring))
-                else:  # region == None means use full pixel
-                    use_all = True
+            if object_type == 'trilegal':
+                active = get_trilegal_active(rdr, hp, region)
 
             for rg in range(rdr.n_row_groups):
-                if subpixels and not use_all:
-                    # need to find out whether the region intersects
-                    # the row group at all.
-                    rg_subs = set(subs[rg])
-                    if not active_nsub.intersection(rg_subs):
+                if object_type == 'trilegal':
+                    if not (active[rg]):
                         continue
 
                 arrow_t = rdr.read_columns(columns, None, rg)
@@ -743,6 +722,16 @@ class SkyCatalog(object):
         '''
         pass
 
+    @property
+    def trilegal_error_count(self):
+        if not hasattr(self,'_trilegal_sed_factory'):
+            return 0
+        return self._trilegal_sed_factory.error_count
+
+    def clear_trilegal_error_count(self):
+        if not hasattr(self,'_trilegal_sed_factory'):
+            return
+        self._trilegal_sed_factory.clear_errors()
 
 def open_catalog(config_file, mp=False, skycatalog_root=None, loglevel="INFO"):
     '''

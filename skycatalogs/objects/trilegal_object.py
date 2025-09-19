@@ -1,8 +1,5 @@
-# import os
 import galsim
-# import h5py
 from .base_object import BaseObject, ObjectCollection, load_lsst_bandpasses
-# from ..utils import normalize_sed
 from .base_config_fragment import BaseConfigFragment
 
 __all__ = ['TrilegalObject', 'TrilegalCollection', 'TrilegalConfigFragment']
@@ -17,8 +14,6 @@ class TrilegalObject(BaseObject):
                          belongs_index)
 
     def _get_sed(self, mjd=None, redshift=0):
-        '''
-        '''
         factory = self._belongs_to._sky_catalog._trilegal_sed_factory
         return factory.get_sed(self)    # unextincted
 
@@ -81,9 +76,6 @@ class TrilegalCollection(ObjectCollection):
 
         # See also classes TrilegalSedFactory, TrilegalSedFile, _SEDBatch in
         # sed_tools.py
-
-        # Is this necessary? Probably not
-        our_config = self.sky_catalog._config['object_types'][object_type]
 
 
 class TrilegalConfigFragment(BaseConfigFragment):

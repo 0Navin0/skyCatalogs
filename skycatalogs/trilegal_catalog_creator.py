@@ -1,3 +1,6 @@
+"""
+Code for creating sky catalogs for trilegal stars
+"""
 import os
 import sys
 from multiprocessing import Process, Pipe
@@ -12,16 +15,13 @@ from skycatalogs.objects.base_object import LSST_BANDS, load_lsst_bandpasses
 from skycatalogs.objects.trilegal_object import TrilegalConfigFragment
 from skycatalogs.utils.config_utils import assemble_provenance
 from skycatalogs.utils.config_utils import assemble_file_metadata
-from skycatalogs.utils.creator_utils import get_trilegal_hp_nrows
-from skycatalogs.utils.creator_utils import find_trilegal_subpixels
-
-"""
-Code for creating sky catalogs for trilegal stars
-"""
+from skycatalogs.utils.trilegal_utils import get_trilegal_hp_nrows
+from skycatalogs.utils.trilegal_utils import find_trilegal_subpixels
 
 __all__ = ['TrilegalMainCatalogCreator', 'TrilegalFluxCatalogCreator']
 
-_DEFAULT_ROW_GROUP_SIZE = 10_000_000  # since fewer columns than galaxies have
+
+# Name of Astro Datalab catalog to be queried
 _DEFAULT_TRUTH_CATALOG = 'lsst_sim.simdr2'
 _DEFAULT_START_EPOCH = 2000
 
@@ -33,7 +33,7 @@ class TrilegalMainCatalogCreator:
         Parameters
         ----------
         catalog_creator  instance of MainCatalogCreator
-        input_catalog    name of Trilegal catalog to be queried
+        truth_catalog    name of Trilegal catalog to be queried
         '''
         self._catalog_creator = catalog_creator
         if not truth_catalog:
@@ -44,7 +44,6 @@ class TrilegalMainCatalogCreator:
         self._start_epoch = start_epoch
         self._output_dir = catalog_creator._output_dir
         self._logger = catalog_creator._logger
-        # self._stride = _DEFAULT_ROW_GROUP_SIZE
         self._stride = self._catalog_creator._stride
 
     @property
@@ -103,33 +102,33 @@ class TrilegalMainCatalogCreator:
 
         '''
 
-        MAX_QUERY_ROWS = 1_000_000
-        #   MAX_QUERY_ROWS = 100_000            # temp for testing
-
         # Note dl is not part of desc-python or LSST Pipelines; it must be
-        # separately installed
+        # separately installed.  See
+        # https://datalab.noirlab.edu/docs/manual/UsingAstroDataLab/InstallDataLab/
         from dl import queryClient as qc
         _NSIDE = 32
 
         # Form queries and issue
         nrows = get_trilegal_hp_nrows(hp, nside=_NSIDE)
         out_nside, out_ring, query_pixels = find_trilegal_subpixels(hp, nrows)
-        n_query = len(query_pixels)
         to_select = ['ra', 'dec', 'av', 'pmracosd', 'pmdec', 'vrad', 'mu0',
                      'label as evol_label', 'logte as logT', 'logg',
                      'logl as logL', 'z as Z',
                      'umag', 'gmag', 'rmag', 'imag', 'zmag', 'ymag']
         # all_results = []
-        writer = None
         rg_written = 0
         if out_ring:
             use_column = 'ring256'
         else:
             use_column = 'nest4096'
-        # per_query = int(len(query_pixels) / n_query)
+
         so_far = 0
-        for iq in range(n_query):
-            in_pixels = ','.join(str(p) for p in query_pixels[iq])
+
+        outpath = os.path.join(self._output_dir, f'trilegal_{hp}.parquet')
+        writer = pq.ParquetWriter(outpath, arrow_schema)
+
+        for pix in query_pixels:
+            in_pixels = ','.join(str(p) for p in pix)
 
             q = 'select ' + ','.join(to_select)
 
@@ -138,17 +137,14 @@ class TrilegalMainCatalogCreator:
             # 600 seconds is max timeout allowed for synchronous query
             # 300 is generous.  Returning 6 million rows took 80 sec.
             # Hardly any of these queries return that many rows.
+            self._logger.debug('About to issue trilegal query')
             try:
-                now = datetime.now().isoformat()[:19]
-                self._logger.debug(f'About to issue query {str(now)}')
                 results = qc.query(adql=q, fmt='pandas', timeout=600)
             except Exception as e:
-                now = datetime.now().isoformat()[:19]
-                self._logger.debug(f'Exception at time {str(now)}')
                 self._logger.debug(str(e))
                 raise
 
-            n_row = len(results['ra'])
+            n_row = len(results)
             if not n_row:
                 continue
             self._logger.info(f'rows returned: {n_row}')
@@ -160,11 +156,6 @@ class TrilegalMainCatalogCreator:
             l_bnd = 0
             u_bnd = min(n_row, self._stride)
             outpath = ''
-
-            if not writer:
-                outpath = os.path.join(self._output_dir,
-                                       f'trilegal_{hp}.parquet')
-                writer = pq.ParquetWriter(outpath, arrow_schema)
 
             while u_bnd > l_bnd:
                 out_dict = {k: results[k][l_bnd: u_bnd] for k in results}
@@ -306,7 +297,6 @@ class TrilegalFluxCatalogCreator:
         # id and 6 flux fields (for now.  Maybe later also Roman)
         fields = [
             pa.field('id', pa.string()),
-            # pa.field('mjd', pa.float64()),
             pa.field('lsst_flux_u', pa.float32(), True),
             pa.field('lsst_flux_g', pa.float32(), True),
             pa.field('lsst_flux_r', pa.float32(), True),

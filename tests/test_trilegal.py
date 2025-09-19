@@ -42,12 +42,6 @@ class TrilegalTester(unittest.TestCase):
         assert(len(object_list.get_collections()) == object_list.collection_count)
         assert(object_list.collection_count == 2)
 
-        # Let it fail if pystellibs isn't available
-        # try:
-        from pystellibs import BTSettl
-        # except ImportError:
-        #    return
-
         from skycatalogs.objects.base_object import load_lsst_bandpasses
 
         print('Running flux comparison')

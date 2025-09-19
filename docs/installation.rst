@@ -13,7 +13,7 @@ Installation Instructions
    If installing without the LSST Science Pipelines, go to the section
    :ref:`without-pipelines`
 
-   To access trilegal objects one must install at least one additional package, possibly more if not useing the LSST Science Pipelines.  See :ref:`trilegal`.
+   To access trilegal objects one must install at least one additional package, possibly more if not using the LSST Science Pipelines.  See :ref:`trilegal`.
 
 .. note::
 

@@ -88,5 +88,7 @@ tbl2 = pq_file2.read_row_group(0, columns=cols)
 
 for c in cols:
     assert tbl1[c] == tbl2[c], f'Column {c} is identical'
+    # For floats should optionally check instead if they're close
+
     if args.debug:
         print(f"Column {c} is identical")
