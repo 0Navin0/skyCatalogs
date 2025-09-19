@@ -236,10 +236,9 @@ class MainCatalogCreator:
         self._dc2 = dc2
         self._obs_sed_factory = None
         if object_type == 'sso':
-            self._sso_creator = SsoMainCatalogCreator(self, self._truth)
+            self._sso_creator = SsoMainCatalogCreator(self)
         if object_type == 'trilegal':
-            self._trilegal_creator = TrilegalMainCatalogCreator(self,
-                                                                self._truth)
+            self._trilegal_creator = TrilegalMainCatalogCreator(self)
         self._run_options = run_options
         self._tophat_sed_bins = None
 

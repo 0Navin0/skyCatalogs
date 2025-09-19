@@ -27,7 +27,7 @@ _DEFAULT_START_EPOCH = 2000
 
 
 class TrilegalMainCatalogCreator:
-    def __init__(self, catalog_creator, truth_catalog,
+    def __init__(self, catalog_creator,
                  start_epoch=_DEFAULT_START_EPOCH):
         '''
         Parameters
@@ -36,10 +36,10 @@ class TrilegalMainCatalogCreator:
         truth_catalog    name of Trilegal catalog to be queried
         '''
         self._catalog_creator = catalog_creator
-        if not truth_catalog:
+        if catalog_creator._truth is None:
             self._truth_catalog = _DEFAULT_TRUTH_CATALOG
         else:
-            self._truth_catalog = truth_catalog
+            self._truth_catalog = catalog_creator._truth
 
         self._start_epoch = start_epoch
         self._output_dir = catalog_creator._output_dir
@@ -77,7 +77,7 @@ class TrilegalMainCatalogCreator:
             pa.field('imag', pa.float32()),
             pa.field('zmag', pa.float32()),
             pa.field('ymag', pa.float32()),
-            ]
+        ]
 
         if metadata_input:
             metadata_bytes = json.dumps(metadata_input).encode('utf8')
@@ -202,7 +202,7 @@ class TrilegalMainCatalogCreator:
 
 
 def _do_trilegal_flux_chunk(send_conn, collection, instrument_needed,
-                            l_bnd, u_bnd,  main_path, row_group, debug=False):
+                            l_bnd, u_bnd, main_path, row_group, debug=False):
     '''
     send_conn         output connection.  If none return output
     collection       object collection we're processing

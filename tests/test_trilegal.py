@@ -3,15 +3,15 @@ from pathlib import Path
 import os
 import numpy as np
 
-from skycatalogs.skyCatalogs import SkyCatalog, open_catalog
+from skycatalogs.skyCatalogs import open_catalog
 from skycatalogs.utils import Disk
-from skycatalogs.objects.base_object import BaseObject
 
 
 PACKAGE_DIR = os.path.dirname(os.path.abspath(str(Path(__file__).parent)))
 SKYCATALOG_ROOT = os.path.join(PACKAGE_DIR, "skycatalogs", "data", "ci_sample")
 
 SKYCATALOG = os.path.join(SKYCATALOG_ROOT, "trilegal_skyCatalog.yaml")
+
 
 class TrilegalTester(unittest.TestCase):
     def setUp(self):
@@ -27,7 +27,6 @@ class TrilegalTester(unittest.TestCase):
 
         import time
 
-
         cat = self._cat
 
         rgn = Disk(56.6, -36.4, 2200)
@@ -38,9 +37,9 @@ class TrilegalTester(unittest.TestCase):
 
         print('Number of collections returned for disk: ',
               object_list.collection_count)
-        colls = object_list.get_collections()
-        assert(len(object_list.get_collections()) == object_list.collection_count)
-        assert(object_list.collection_count == 2)
+
+        assert (len(object_list.get_collections()) == object_list.collection_count)
+        assert (object_list.collection_count == 2)
 
         from skycatalogs.objects.base_object import load_lsst_bandpasses
 
@@ -62,7 +61,11 @@ class TrilegalTester(unittest.TestCase):
                 calc_flux = chromatic.calculateFlux(bandpasses[b])
                 att = f'lsst_flux_{b}'
                 cache_flux = obj.get_native_attribute(att)
-                assert np.isclose(calc_flux, cache_flux, atol=0) , f'id {id}, band {b}'
+                # Default rtol is too strict currently since cached flux
+                # values were computed under different conditions (without
+                # SED thinning).  Should create new files for CI.
+                assert np.isclose(calc_flux, cache_flux, rtol=1e-04, atol=0), f'id {id}, band {b}'
+
 
 if __name__ == '__main__':
     unittest.main()
