@@ -61,10 +61,7 @@ class TrilegalTester(unittest.TestCase):
                 calc_flux = chromatic.calculateFlux(bandpasses[b])
                 att = f'lsst_flux_{b}'
                 cache_flux = obj.get_native_attribute(att)
-                # Default rtol is too strict currently since cached flux
-                # values were computed under different conditions (without
-                # SED thinning).  Should create new files for CI.
-                assert np.isclose(calc_flux, cache_flux, rtol=1e-04, atol=0), f'id {id}, band {b}'
+                assert np.isclose(calc_flux, cache_flux, atol=0), f'id {id}, band {b}'
 
 
 if __name__ == '__main__':
