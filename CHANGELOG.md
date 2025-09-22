@@ -1,3 +1,9 @@
+## Version 2.2.0
+Add support for TRILEGAL catalogs; that is,
+- Create catalogs using the AstroLab database as input
+- TRILEGAL catalogs may be read from the API
+- Additional test program and associated data files
+
 ## Version 2.1.1
 - Minimize LSST stack dependency further to simulate Gaia objects without it
 - Switch to `uv pip install` in CI

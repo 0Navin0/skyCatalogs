@@ -98,7 +98,6 @@ jobs:
               with:
                 python-version: ${{ matrix.python-version }}
 
-
             - name: Install skyCatalogs
               run: |
                 uv venv
@@ -109,7 +108,7 @@ jobs:
               run: |
                 export RUBIN_SIM_DATA_DIR=`pwd`/rubin_sim_data
                 export SIMS_SED_LIBRARY_DIR=${RUBIN_SIM_DATA_DIR}/sims_sed_library
-                uv run pytest --ignore-glob=tests/test_gaia*.py
+                uv run pytest --ignore-glob=tests/test_gaia*.py --ignore-glob=tests/test_trilegal.py
 
     full-stack-build:
         needs: [rubin_sim_data]
@@ -166,10 +165,20 @@ jobs:
               run: |
                 conda install -y --file etc/conda_requirements.txt
 
+            - name: Install pystellibs
+              run: |
+                git clone https://github.com/JoanneBogart/pystellibs.git
+                cd pystellibs
+                git checkout v1.0.0
+                pip install --no-build-isolation --no-deps -e .
+                cd ..
+
             - name: Run tests with the LSST Stack
               run: |
                 export RUBIN_SIM_DATA_DIR=`pwd`/rubin_sim_data
                 export SIMS_SED_LIBRARY_DIR=${RUBIN_SIM_DATA_DIR}/sims_sed_library
+                export PYTHONPATH=`pwd`/pystellibs:${PYTHONPATH}
+
                 eups list lsst_distrib
                 setup -k -r .
                 pytest --cov=skycatalogs --cov-report=xml --cov-report=term-missing tests/

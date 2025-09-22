@@ -62,7 +62,7 @@ class SsoMainCatalogCreator:
     _sso_truth = '/sdf/data/rubin/shared/ops-rehearsals/ops-rehearsal-4/imSim_catalogs/inputs/sso'
     _sso_db_tbl = 'results'
 
-    def __init__(self, catalog_creator, sso_truth=None, sso_db_tbl=None):
+    def __init__(self, catalog_creator, sso_db_tbl=None):
         '''
         Parameters
         ----------
@@ -73,9 +73,11 @@ class SsoMainCatalogCreator:
         self._catalog_creator = catalog_creator
         self._output_dir = catalog_creator._output_dir
         self._logger = catalog_creator._logger
-        self._sso_truth = sso_truth
-        if sso_truth is None:
+
+        if catalog_creator._truth is None:
             self._sso_truth = SsoMainCatalogCreator._sso_truth
+        else:
+            self._sso_truth = catalog_creator._truth
 
         self._sso_db_tbl = sso_db_tbl
         if sso_db_tbl is None:
@@ -190,7 +192,6 @@ class SsoFluxCatalogCreator:
         Parameters
         ----------
         catalog_creator   instance of FluxCatalogCreator
-        sso_truth         path to input data directory
         '''
         self._catalog_creator = catalog_creator
         self._output_dir = catalog_creator._output_dir

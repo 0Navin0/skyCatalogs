@@ -1,0 +1,46 @@
+area_partition:
+  nside: 32
+  ordering: ring
+  type: healpix
+data_file_type: parquet
+file_template: trilegal_(?P<healpix>\d+).parquet
+flux_file_template: trilegal_flux_(?P<healpix>\d+).parquet
+internal_extinction: None
+provenance:
+  inputs:
+    trilegal_truth: lsst_sim.simdr2
+  post_process:
+    make_sparse_catalog.py
+  run_options:
+    catalog_dir: trilegal_batch
+    catalog_name: trilegal_skyCatalog
+    config_path: null
+    dc2: false
+    galaxy_magnitude_cut: 29.0
+    knots_magnitude_cut: 27.0
+    log_level: INFO
+    no_knots: false
+    nside: 32
+    object_type: trilegal
+    options_file: main_batch_9566_9683_9684_9812_9813_9940.yaml
+    pixels:
+    - 9556
+    - 9683
+    - 9684
+    - 9812
+    - 9813
+    - 9940
+    skip_done: false
+    skycatalog_root: null
+    sso_sed: null
+    star_input_fmt: sqlite
+    stride: 10000000
+    truth: null
+  skyCatalogs_repo:
+    git_branch: u/jrbogart/trilegal_rebase
+    git_hash: 0dee179707d635275bf6e00f5cde8962b40469ca
+    git_status:
+    - CLEAN
+  versioning:
+    code_version: 2.1.1
+    schema_version: 1.3.0

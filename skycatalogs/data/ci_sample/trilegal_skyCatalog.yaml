@@ -1,0 +1,7 @@
+catalog_dir: .
+catalog_name: trilegal_skyCatalog
+object_types:
+  trilegal: !include |-
+    trilegal.yaml
+schema_version: 1.3.0
+skycatalog_root: /pscratch/sd/j/jrbogart/desc/skycatalogs
