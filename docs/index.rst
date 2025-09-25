@@ -32,6 +32,7 @@ https://github.com/LSSTDESC/skyCatalogs.
    roman-rubin-1.1.2/diffsky_galaxy
    roman-rubin-1.1.2/UW_stars
    roman-rubin-1.1.2/snana
+   trilegal/lsst_sim.simdr2.rst
 
 .. toctree::
    :maxdepth: 2
