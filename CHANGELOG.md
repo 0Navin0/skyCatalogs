@@ -1,3 +1,7 @@
+## Version 2.3.0
+Split off all code needed only for catalog creation into separate repe:
+skyCatalogs_creator
+
 ## Version 2.2.0
 Add support for TRILEGAL catalogs; that is,
 - Create catalogs using the AstroLab database as input
