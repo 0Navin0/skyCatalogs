@@ -410,7 +410,10 @@ class SkyCatalog(object):
     def ignore_files(self, object_type, hps, flux=True):
         '''
         Remove specified files from internal data structure _hp_info so
-        they will be ignored
+        they will be ignored.  In particular, this functions is needed
+        by skyCatalogs_creator when creating flux files.  It needs a
+        SkyCatalogs object in order to read main files, but existing
+        flux files can cause problems if not ignored.
 
         Parameters
         ----------
