@@ -6,9 +6,10 @@
 =======================================================
 skyCatalogs: provides API for simulated object catalogs
 =======================================================
-skyCatalogs both creates simulated object catalogs (from precursor catalogs)
-and provides a uniform API to the catalogs it makes and to certain other
-catalogs. These catalogs may be used as inputs to image simulation (originally
+skyCatalogs  provides a uniform API to the catalogs created by its sister
+package `skyCatalogs_creator` and to third-party catalogs following certain
+conventions.
+These catalogs may be used as inputs to image simulation (originally
 only for the Rubin Observatory; since also used in simulations for the
 Roman Observatory) and as truth catalogs.
 
@@ -31,6 +32,7 @@ https://github.com/LSSTDESC/skyCatalogs.
    roman-rubin-1.1.2/diffsky_galaxy
    roman-rubin-1.1.2/UW_stars
    roman-rubin-1.1.2/snana
+   trilegal/lsst_sim.simdr2.rst
 
 .. toctree::
    :maxdepth: 2

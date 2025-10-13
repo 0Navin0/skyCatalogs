@@ -407,6 +407,40 @@ class SkyCatalog(object):
         hp_list.sort()
         return hp_list
 
+    def ignore_files(self, object_type, hps, flux=True):
+        '''
+        Remove specified files from internal data structure _hp_info so
+        they will be ignored.  In particular, this functions is needed
+        by skyCatalogs_creator when creating flux files.  It needs a
+        SkyCatalogs object in order to read main files, but existing
+        flux files can cause problems if not ignored.
+
+        Parameters
+        ----------
+        object_type    string        object type name
+        hps            list of int   healpix ids
+        flux           boolean       ignore flux files or main files
+        '''
+        type_config = self._config['object_types'][object_type]
+        if flux:
+            templ = type_config['flux_file_template']
+        else:
+            templ = type_config['file_template']
+
+        to_replace = '(?P<healpix>\\d+)'
+        for hp in hps:
+            if hp not in self._hp_info:
+                continue
+            my_info = self._hp_info[hp]
+            if object_type not in my_info['object_types']:
+                continue
+            fpath = templ.replace(to_replace, str(hp))
+            if fpath in my_info['files']:
+                _ = my_info['files'].pop(fpath)
+                _ = my_info['object_types'][object_type].remove(fpath)
+
+        return
+
     def hps_by_type(self, object_type):
         '''
         Parameters
