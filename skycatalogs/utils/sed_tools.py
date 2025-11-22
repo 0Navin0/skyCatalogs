@@ -1,6 +1,7 @@
 import os
 import re
 from astropy import units as u
+from astropy.coordinates import Distance
 from astropy.cosmology import FlatLambdaCDM
 import astropy.constants
 import h5py
@@ -252,7 +253,7 @@ class TrilegalSedFactory():
         if not self._pystellib:
             from pystellibs import BTSettl
             self._pystellib = BTSettl(medres=False)
-            self._wl = self._pystellib.wavelength / 10  # convert to nm
+            self._wl = self._pystellib.wavelength  # units of Angstroms
 
         # Get inputs from parquet file
         native = ['logT', 'logg', 'logL', 'Z']
@@ -280,8 +281,21 @@ class TrilegalSedFactory():
             self._errors += 1
             return None
 
+        # BTSettl.generate_stellar_spectrum produces spectra with
+        # units erg/Angstrom/s, whereas galsim flambda units are
+        # erg/Angstrom/cm^2/s, with wave_type='Angstrom'.  To convert
+        # to flambda, we need to apply the inverse-square law.
+        # We do this in log space to avoid underflows.
+
+        # Compute distance to star in cm from the distance modulus.
+        mu0 = tri.get_native_attribute("mu0")
+        dist = Distance(distmod=mu0).to(u.cm).value
+        # Apply 1/(4*pi*dist**2) dilution factor.
+        log_dilution = np.log(4.0*np.pi) + 2.0*np.log(dist)
+        index = np.where(spectrum > 0)  # avoid zeros
+        spectrum[index] = np.exp(np.log(spectrum[index]) - log_dilution)
         sed_table = galsim.LookupTable(self._wl, spectrum, interpolant='linear')
-        sed = galsim.SED(sed_table, 'nm', 'flambda')
+        sed = galsim.SED(sed_table, 'Angstrom', 'flambda')
 
         return sed
 
