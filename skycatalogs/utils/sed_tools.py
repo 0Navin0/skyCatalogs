@@ -330,6 +330,14 @@ class TrilegalSedFactory():
             a_dict[k] = a_dict[k][l_bnd: u_bnd]
         df = pd.DataFrame(a_dict)
         wl_axis, spectra = self._pystellib.generate_individual_spectra(df)
+        spectra = np.array(spectra)
+
+        dist = Distance(distmod=df['mu0'].to_numpy()).to(u.cm).value
+        log_dilution = np.log(4.0*np.pi) + 2.0*np.log(dist)
+        log_dilution = np.stack([log_dilution]*spectra.shape[1], axis=1)
+
+        index = np.where(spectra > 0)
+        spectra[index] = np.exp(np.log(spectra[index]) - log_dilution[index])
 
         # Convert wl_axis, spectra from A to nm.
         wl_axis = wl_axis / 10
