@@ -317,7 +317,7 @@ class TrilegalSedFactory():
         Returns
         -------
         wavelength axis  numpy array of dimension n_wl
-        flux values      numpy array  with shape (n_obj, n_wl)
+        array of galsim SED (not extincted)
 
         '''
         if not self._pystellib:
@@ -336,16 +336,19 @@ class TrilegalSedFactory():
         log_dilution = np.log(4.0*np.pi) + 2.0*np.log(dist)
         log_dilution = np.stack([log_dilution]*spectra.shape[1], axis=1)
 
-        index = np.where(spectra > 0)
+        index = np.asarray(spectra > 0).nonzero()
         spectra[index] = np.exp(np.log(spectra[index]) - log_dilution[index])
-
-        # Convert wl_axis, spectra from A to nm.
-        wl_axis = wl_axis / 10
-        spectra = spectra * 10
         spectra_32 = spectra.astype(np.float32)
+        seds = [galsim.SED(galsim.LookupTable(
+            wl_axis, spectrum,
+            interpolant='linear'), 'Angstrom', 'flambda')
+                if not np.isnan(spectrum[0]) else None  for spectrum in spectra]
+
         del df
         del spectra
-        return wl_axis, spectra_32
+        del spectra_32
+
+        return seds
 
 
 class SsoSedFactory():
