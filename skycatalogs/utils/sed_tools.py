@@ -234,6 +234,12 @@ class TrilegalSedFactory():
     def clear_errors(self):
         self._errors = 0
 
+    def _finish_init(self):
+        if not self._pystellib:
+            from pystellibs import BTSettl
+            self._pystellib = BTSettl(medres=False)
+            self._wl = self._pystellib.wavelength  # units of Angstroms
+
     def get_sed(self, tri):
         '''
         Parameters
@@ -251,9 +257,7 @@ class TrilegalSedFactory():
         handled elsewhere
         '''
         if not self._pystellib:
-            from pystellibs import BTSettl
-            self._pystellib = BTSettl(medres=False)
-            self._wl = self._pystellib.wavelength  # units of Angstroms
+            self._finish_init()
 
         # Get inputs from parquet file
         native = ['logT', 'logg', 'logL', 'Z']
@@ -321,9 +325,7 @@ class TrilegalSedFactory():
 
         '''
         if not self._pystellib:
-            from pystellibs import BTSettl
-            self._pystellib = BTSettl(medres=False)
-            self._wl = self._pystellib.wavelength  # units of Angstroms
+            self._finish_init()
 
         columns = ['id', 'logT', 'logg', 'logL', 'Z', 'mu0']
         a_dict = pq_main.read_row_group(batch, columns=columns).to_pydict()
