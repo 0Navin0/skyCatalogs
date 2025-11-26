@@ -323,6 +323,7 @@ class TrilegalSedFactory():
         if not self._pystellib:
             from pystellibs import BTSettl
             self._pystellib = BTSettl(medres=False)
+            self._wl = self._pystellib.wavelength  # units of Angstroms
 
         columns = ['id', 'logT', 'logg', 'logL', 'Z', 'mu0']
         a_dict = pq_main.read_row_group(batch, columns=columns).to_pydict()
