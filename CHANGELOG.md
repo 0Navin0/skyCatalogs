@@ -1,3 +1,8 @@
+## Version 2.4.0
+- Correct normalization of Trilegal SED.
+- Update `TrilegalSedFactory.get_spectra_batch` interface (no longer need
+  to return wavelength axis).
+
 ## Version 2.3.0
 Split off all code needed only for catalog creation into separate repe:
 skyCatalogs_creator
