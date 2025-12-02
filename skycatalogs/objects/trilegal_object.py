@@ -24,16 +24,13 @@ class TrilegalObject(BaseObject):
 
     def get_observer_sed_component(self, component, mjd=None):
         '''
-        Apply extinction, normalize
+        Apply extinction.  Normalization occurs in TrilegalSedFactory.
         '''
         sed = self._get_sed(mjd=mjd)
 
         if sed is not None:
             sed = self._apply_component_extinction(sed)
-            # sed = sed.thin()                   # might not want this
-            imag = self.get_native_attribute('imag')
-            sed = sed.withMagnitude(imag,
-                                    self._belongs_to._lsst_bandpasses['i'])
+
         return sed
 
     def _get_dust(self):

@@ -1,6 +1,7 @@
 import os
 import re
 from astropy import units as u
+from astropy.coordinates import Distance
 from astropy.cosmology import FlatLambdaCDM
 import astropy.constants
 import h5py
@@ -230,6 +231,12 @@ class TrilegalSedFactory():
     def error_count(self):
         return self._errors
 
+    def pystellib(self):
+        if not self._pystellib:
+            from pystellibs import BTSettl
+            self._pystellib = BTSettl(medres=False)
+        return self._pystellib
+
     def clear_errors(self):
         self._errors = 0
 
@@ -249,10 +256,8 @@ class TrilegalSedFactory():
         just as calculated by pystellib. The other transformations are
         handled elsewhere
         '''
-        if not self._pystellib:
-            from pystellibs import BTSettl
-            self._pystellib = BTSettl(medres=False)
-            self._wl = self._pystellib.wavelength / 10  # convert to nm
+        # if not self._pystellib:
+        #     self._finish_init()
 
         # Get inputs from parquet file
         native = ['logT', 'logg', 'logL', 'Z']
@@ -262,14 +267,14 @@ class TrilegalSedFactory():
         # interpolation range
         error_msg = None
         try:
-            spectrum = self._pystellib.generate_stellar_spectrum(*spec_inputs)
+            spectrum = self.pystellib().generate_stellar_spectrum(*spec_inputs)
         except RuntimeError:
             error_msg = 'Run-time error generating SED'
 
         if not error_msg:
             if spectrum is None:
                 error_msg = 'No SED computed'
-            elif np.isnan(spectrum[0]):
+            elif any(np.isnan(spectrum)):
                 error_msg = 'NaNs in SED'
 
         if error_msg:
@@ -280,8 +285,22 @@ class TrilegalSedFactory():
             self._errors += 1
             return None
 
-        sed_table = galsim.LookupTable(self._wl, spectrum, interpolant='linear')
-        sed = galsim.SED(sed_table, 'nm', 'flambda')
+        # BTSettl.generate_stellar_spectrum produces spectra with
+        # units erg/Angstrom/s, whereas galsim flambda units are
+        # erg/Angstrom/cm^2/s, with wave_type='Angstrom'.  To convert
+        # to flambda, we need to apply the inverse-square law.
+        # We do this in log space to avoid underflows.
+
+        # Compute distance to star in cm from the distance modulus.
+        mu0 = tri.get_native_attribute("mu0")
+        dist = Distance(distmod=mu0).to(u.cm).value
+        # Apply 1/(4*pi*dist**2) dilution factor.
+        log_dilution = np.log(4.0*np.pi) + 2.0*np.log(dist)
+        index = np.where(spectrum > 0)  # avoid zeros
+        spectrum[index] = np.exp(np.log(spectrum[index]) - log_dilution)
+        sed_table = galsim.LookupTable(self.pystellib().wavelength, spectrum,
+                                       interpolant='linear')
+        sed = galsim.SED(sed_table, 'Angstrom', 'flambda')
 
         return sed
 
@@ -303,27 +322,34 @@ class TrilegalSedFactory():
         Returns
         -------
         wavelength axis  numpy array of dimension n_wl
-        flux values      numpy array  with shape (n_obj, n_wl)
+        array of galsim SED (not extincted)
 
         '''
-        if not self._pystellib:
-            from pystellibs import BTSettl
-            self._pystellib = BTSettl(medres=False)
-
         columns = ['id', 'logT', 'logg', 'logL', 'Z', 'mu0']
         a_dict = pq_main.read_row_group(batch, columns=columns).to_pydict()
         for k in a_dict.keys():
             a_dict[k] = a_dict[k][l_bnd: u_bnd]
         df = pd.DataFrame(a_dict)
-        wl_axis, spectra = self._pystellib.generate_individual_spectra(df)
+        wl_axis, spectra = self.pystellib().generate_individual_spectra(df)
+        spectra = np.array(spectra)
 
-        # Convert wl_axis, spectra from A to nm.
-        wl_axis = wl_axis / 10
-        spectra = spectra * 10
+        dist = Distance(distmod=df['mu0'].to_numpy()).to(u.cm).value
+        log_dilution = np.log(4.0*np.pi) + 2.0*np.log(dist)
+        log_dilution = np.stack([log_dilution]*spectra.shape[1], axis=1)
+
+        index = np.asarray(spectra > 0).nonzero()
+        spectra[index] = np.exp(np.log(spectra[index]) - log_dilution[index])
         spectra_32 = spectra.astype(np.float32)
+        seds = [galsim.SED(galsim.LookupTable(
+            wl_axis, spectrum,
+            interpolant='linear'), 'Angstrom', 'flambda')
+                if not any(np.isnan(spectrum)) else None  for spectrum in spectra]
+
         del df
         del spectra
-        return wl_axis, spectra_32
+        del spectra_32
+
+        return seds
 
 
 class SsoSedFactory():
