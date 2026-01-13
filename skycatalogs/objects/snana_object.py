@@ -188,7 +188,7 @@ class SnanaObject(BaseObject):
                 self._lambda = np.array(f[self._id]['lambda'])
 
             if mjd_ix_l == mjd_ix_u:
-                flambda = f[self._id]['flamba'][mjd_ix_l]
+                flambda = f[self._id]['flambda'][mjd_ix_l]
             else:
                 mjd_ix = mjd_ix_u
                 below = f[self._id]['flambda'][mjd_ix - 1]
